@@ -17,7 +17,6 @@ if (isset($_GET['url'])) {
 	exit();
 }
 
-$SUMMARY_SUFFIX = 'Delayed by Podcast Time Machine by Hundter Biede';
 
 if (isset($_GET['delay']) && is_numeric($_GET['delay'])) {
 	$delay = $_GET['delay'];
@@ -46,8 +45,6 @@ foreach ($file_content_lines as $line) {
 			$title = trim(str_replace("<>", "", preg_replace("<\s{0,}title\s{0,}>", "", str_replace("<>", "", preg_replace("<\/\s{0,}title\s{0,}>", "", $line)))));
 			echo "<title>" . $title . " - Time Machine" . "</title>\n";
 			$firstTitle = false;
-		} elseif (strpos($line, "<itunes:summary>") !== false) {
-			echo strpos($line, "CDATA") !== false ? str_replace("]]", "<br>" . $SUMMARY_SUFFIX . "]]", $line) : str_replace("</", " - " . $SUMMARY_SUFFIX . "</", $line);
 		} else {
 			echo $line . "\n";
 		}
@@ -57,6 +54,7 @@ foreach ($file_content_lines as $line) {
 			// pubDate tag - delay it
 			$date_string = str_replace("<>", "", preg_replace("<\s{0,}pubDate\s{0,}>", "", str_replace("<>", "", preg_replace("<\/\s{0,}pubDate\s{0,}>", "", $line))));
 			$date = date_create($date_string);
+			$originalAirDate = "Originally Published " . $date->format("l F jS, Y");
 			$date = $date->add(date_interval_create_from_date_string($delay . ' days'));
 			$itemString .= "<pubDate>" . $date->format(DateTime::RFC2822) . "</pubDate>\n";
 		} elseif (strpos($line, "</item>") !== false) {
@@ -68,7 +66,7 @@ foreach ($file_content_lines as $line) {
 			if ($date <= (new DateTime())) echo $itemString; // only print if not a future item
 			$itemString = "";
 			unset($date);
-		} elseif (trim($line) !== ""){
+		} elseif (trim($line) !== "") {
 			// add all non pubDate tags to the item block with a new line character
 			$itemString .= $line . (strpos($line, "\n") !== false ? "" : "\n");
 		}
