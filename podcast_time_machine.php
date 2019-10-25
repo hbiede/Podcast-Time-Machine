@@ -17,6 +17,8 @@ if (isset($_GET['url'])) {
 	exit();
 }
 
+$SUMMARY_SUFFIX = 'Delayed by Podcast Time Machine by Hundter Biede';
+
 if (isset($_GET['delay']) && is_numeric($_GET['delay'])) {
 	$delay = $_GET['delay'];
 } else {
@@ -24,23 +26,28 @@ if (isset($_GET['delay']) && is_numeric($_GET['delay'])) {
 }
 
 // split the file into an array of individual lines. Also, ensure the pubDate tags are always on new lines
-$file_content_lines = explode("\n", str_replace("</pubDate>", "</pubDate>\n", str_replace("<pubDate>", "\n<pubDate>", file_get_contents(urldecode($url)))));
+$file_content_lines = explode("\n", file_get_contents(urldecode($url)));
 
 $isInItemBlock = false;
 $itemString = "";
+$originalAirDate = "";
 $date;
+$firstTitle = true;
 foreach ($file_content_lines as $line) {
 	// loops through each line entry on the 
 	if(!$isInItemBlock && strpos($line, "<item>") !== false) {
 		// start a new item block
 		$isInItemBlock = true;
 		$itemString .= $line;
-	} elseif (!$isInItemBlock && trim($line) !== "\n" && trim($line) !== "") {
+	} elseif (!$isInItemBlock) {
 		// print all the header/footer info
-		if (strpos($line, "<title>") !== false) {
+		if ($firstTitle && strpos($line, "<title>") !== false) {
 			// title tag - add time machine suffix
 			$title = trim(str_replace("<>", "", preg_replace("<\s{0,}title\s{0,}>", "", str_replace("<>", "", preg_replace("<\/\s{0,}title\s{0,}>", "", $line)))));
 			echo "<title>" . $title . " - Time Machine" . "</title>\n";
+			$firstTitle = false;
+		} elseif (strpos($line, "<itunes:summary>") !== false) {
+			echo strpos($line, "CDATA") !== false ? str_replace("]]", "<br>" . $SUMMARY_SUFFIX . "]]", $line) : str_replace("</", " - " . $SUMMARY_SUFFIX . "</", $line);
 		} else {
 			echo $line . "\n";
 		}
@@ -55,7 +62,6 @@ foreach ($file_content_lines as $line) {
 		} elseif (strpos($line, "</item>") !== false) {
 			// end of an item block - print only if entry, after adjustment, is in the past
 			if (!isset($date)) $itemString .= "<pubDate>" . (new DateTime())->format(DateTime::RFC2822) . "</pubDate>\n"; // add now as the time if no date was found
-			
 			// reset variables for next item block
 			$isInItemBlock = false;
 			$itemString .= $line;
