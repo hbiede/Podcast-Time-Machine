@@ -2,7 +2,7 @@
 /*
  * Podcast Time Machine 
  * Created by Hundter Biede on October 22, 2019
- * Version 1.0.1
+ * Version 1.0.2
  *
  * A PHP script that takes an RSS feed in standard podcasting XML format and delays it by a set number of days.
  * The RSS feed is given by including it as the query parameter 'url', must be URL encoded (as by urlencode()).
@@ -39,8 +39,8 @@ foreach ($file_content_lines as $line) {
 		// print all the header/footer info
 		if (strpos($line, "<title>") !== false) {
 			// title tag - add time machine suffix
-			$title = str_replace("<>", "", preg_replace("<\s{0,}title\s{0,}>", "", str_replace("<>", "", preg_replace("<\/\s{0,}title\s{0,}>", "", $line))));
-			$itemString .= "<title>" . $title . " - Time Machine" . "</title>\n";
+			$title = trim(str_replace("<>", "", preg_replace("<\s{0,}title\s{0,}>", "", str_replace("<>", "", preg_replace("<\/\s{0,}title\s{0,}>", "", $line)))));
+			echo "<title>" . $title . " - Time Machine" . "</title>\n";
 		} else {
 			echo $line . "\n";
 		}
