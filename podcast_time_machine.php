@@ -116,24 +116,30 @@ if ($delay !== 0) {
                 </div>
                 <button class="btn btn-primary" onclick="urlGen()">Create Link</button>
             </div>
-            <h5 id="link"></h5>
+            <h5 id="link" style="margin-top:20px;"></h5>
         </div>
     </div>
 </main>
 <script>
     function urlGen() {
-        let loc = window.location.href;
+        const errorDiv = document.getElementById('error');
+        errorDiv.innerHTML = '';
+
+        let loc = window.location.href.split("?")[0];
         let rssUrl = document.getElementById('url').value;
         let delay = document.getElementById('delay').value;
         if (!rssUrl.includes('http')) rssUrl = 'http://' + rssUrl;
-        if (rssUrl.match(/^https?:\/\/[\w\-_]+\.[\w]+/) && delay.trim().length !== 0 && !isNaN(delay)) {
+        if (rssUrl.match(/^https?:\/\/[\w\-_]+\.[\w]+/) && delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
             const tmUrl = loc + '?url=' + encodeURI(rssUrl) + '&delay=' + delay;
             document.getElementById('link').innerHTML = '<a target="_blank" href="'
                 + tmUrl + '">' + tmUrl + '</a>';
+        } else if (delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
+            errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Invalid URL</div>';
         } else {
-            document.getElementById('error').innerHTML = '<div class="alert alert-danger" role="alert">This is a danger alert—check it out!</div>'
+            errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Invalid Delay</div>';
         }
     }
 </script>
 </body>
 </html>
+
