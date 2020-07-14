@@ -130,7 +130,7 @@ if ($delay !== 0) {
         let delay = document.getElementById('delay').value;
         if (!rssUrl.includes('http')) rssUrl = 'http://' + rssUrl;
         if (rssUrl.match(/^https?:\/\/[\w\-_]+\.[\w]+/) && delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
-            const tmUrl = loc + '?url=' + encodeURI(rssUrl) + '&delay=' + delay;
+            const tmUrl = loc + '?url=' + encodeURIComponent(rssUrl) + '&delay=' + delay;
             document.getElementById('link').innerHTML = '<a target="_blank" href="'
                 + tmUrl + '">' + tmUrl + '</a>';
         } else if (delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
