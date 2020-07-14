@@ -71,7 +71,7 @@ if ($delay !== 0) {
             }
         }
     }
-    echo $file_content->asXML();
+    echo preg_replace('#\s*\\<item\\>\\<\\/item\\>\\n#', '', $file_content->asXML());
     return;
 }
 ?>
