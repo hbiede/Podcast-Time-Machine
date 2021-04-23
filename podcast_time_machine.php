@@ -2,14 +2,14 @@
 /*
  * Podcast Time Machine 
  * Created by Hundter Biede on October 22, 2019
- * Version 2.0
+ * Version 2.1
  *
  * A PHP script that takes an RSS feed in standard podcasting XML format and delays it by a set number of days.
  * The RSS feed is given by including it as the query parameter 'url', must be URL encoded (as by urlencode()).
  * The delay can be included as a number of days as the query parameter 'delay'.
  */
 
-function &find_root_tag(SimpleXMLElement $file_content): ?SimpleXMLElement {
+function &find_root_tag($file_content) {
     $return_val = &$file_content;
     while (!contains_item($return_val)) {
         if ($return_val->children()->count()) {
@@ -22,14 +22,14 @@ function &find_root_tag(SimpleXMLElement $file_content): ?SimpleXMLElement {
     return $return_val;
 }
 
-function contains_item(SimpleXMLElement $file_contents): bool {
+function contains_item($file_contents) {
     foreach ($file_contents as $child) {
         if ($child->getName() === 'item') return true;
     }
     return false;
 }
 
-$url = "";
+$url = '';
 $delay = 0;
 if (isset($_GET['url'])) {
     $url = $_GET['url'];
@@ -45,7 +45,13 @@ if (isset($_GET['delay']) && is_numeric($_GET['delay'])) {
 }
 
 if ($delay !== 0) {
-    $file_content = new SimpleXMLElement(file_get_contents(urldecode($url)));
+    $content = file_get_contents(urldecode($url));
+    if (strpos($content, "<itunes:block>") !== false) {
+        $content = preg_replace("/<itunes:block>.*?<\/itunes:block>/", "<itunes:block>Yes</itunes:block>", $content);
+    } else {
+        $content = str_replace("<itunes:category>", "<itunes:block>Yes</itunes:block>\n<itunes:category>", $content);
+    }
+    $file_content = new SimpleXMLElement($content);
     $root =& find_root_tag($file_content);
     if ($root !== null) {
         foreach ($root as $post) {
@@ -122,8 +128,8 @@ if ($delay !== 0) {
 </main>
 <script>
     function urlGen() {
-        const errorDiv = document.getElementById('error');
-        errorDiv.innerHTML = '';
+	const errorDiv = document.getElementById('error');
+	errorDiv.innerHTML = '';
 
         let loc = window.location.href.split("?")[0];
         let rssUrl = document.getElementById('url').value;
