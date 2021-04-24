@@ -2,7 +2,7 @@
 /*
  * Podcast Time Machine 
  * Created by Hundter Biede on October 22, 2019
- * Version 2.1
+ * Version 2.1.1
  *
  * A PHP script that takes an RSS feed in standard podcasting XML format and delays it by a set number of days.
  * The RSS feed is given by including it as the query parameter 'url', must be URL encoded (as by urlencode()).
@@ -128,24 +128,24 @@ if ($delay !== 0) {
 </main>
 <script>
     function urlGen() {
-	const errorDiv = document.getElementById('error');
-	errorDiv.innerHTML = '';
+        const errorDiv = document.getElementById('error');
+        errorDiv.innerHTML = '';
 
         let loc = window.location.href.split("?")[0];
         let rssUrl = document.getElementById('url').value;
         let delay = document.getElementById('delay').value;
         if (!rssUrl.includes('http')) rssUrl = 'http://' + rssUrl;
-        if (rssUrl.match(/^https?:\/\/[\w\-_]+\.[\w]+/) && delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
+        const validURL = rssUrl.match(/^https?:\/\/[\w\-_]+\.[\w]+/);
+        if (validURL && delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
             const tmUrl = loc + '?url=' + encodeURIComponent(rssUrl) + '&delay=' + delay;
             document.getElementById('link').innerHTML = '<a target="_blank" href="'
                 + tmUrl + '">' + tmUrl + '</a>';
-        } else if (delay.trim().length !== 0 && !isNaN(delay) && delay > 0) {
-            errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Invalid URL</div>';
-        } else {
+        } else if (validURL) {
             errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Invalid Delay</div>';
+        } else {
+            errorDiv.innerHTML = '<div class="alert alert-danger" role="alert">Invalid URL</div>';
         }
     }
 </script>
 </body>
 </html>
-
