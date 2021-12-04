@@ -7,6 +7,9 @@
  * A PHP script that takes an RSS feed in standard podcasting XML format and delays it by a set number of days.
  * The RSS feed is given by including it as the query parameter 'url', must be URL encoded (as by urlencode()).
  * The delay can be included as a number of days as the query parameter 'delay'.
+ *
+ * This script relies on a Crontab to update Overcast of its changes. This happens through the following Crontab entry:
+ * `1 0 * * MON wget "https://overcast.fm/ping?urlprefix=https%3A%2F%2Fcse.unl.edu%2F~hbiede%2Fpodcast_time_machine"`
  */
 
 function &find_root_tag($file_content) {
@@ -47,6 +50,7 @@ if (isset($_GET['delay']) && is_numeric($_GET['delay'])) {
 if ($delay !== 0) {
     $content = file_get_contents(urldecode($url));
     if (strpos($content, "<itunes:block>") !== false) {
+        // Prevents the RSS feed from appearing in the iTunes directory
         $content = preg_replace("/<itunes:block>.*?<\/itunes:block>/", "<itunes:block>Yes</itunes:block>", $content);
     } else {
         $content = str_replace("<itunes:category>", "<itunes:block>Yes</itunes:block>\n<itunes:category>", $content);
